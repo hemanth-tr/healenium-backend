@@ -47,4 +47,9 @@ public class Utils {
         return "screenshot_" + LocalDateTime.now().format(DateTimeFormatter
                 .ofPattern("dd-MMM-yyyy-hh-mm-ss.SSS").withLocale(Locale.US)) + ".png";
     }
+
+    public String trimQueryString(String url) {
+        int queryStringStartIndex = url.indexOf("?");
+        return url.substring(0, queryStringStartIndex);
+    }
 }
