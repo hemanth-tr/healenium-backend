@@ -36,7 +36,6 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 import javax.transaction.Transactional;
 import java.io.File;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,16 +77,11 @@ public class HealingServiceImpl implements HealingService {
 
     @Override
     public LastHealingDataDto getSelectorPath(RequestDto dto) {
-
-        String url = Utils.trimQueryString(dto.getUrl());
-        String selectorId = Utils.buildKey(dto.getClassName(), dto.getLocator(), url);
-        System.out.println("getSelectorPath-SelectorId: " + selectorId);
-
+        String selectorId = Utils.buildKey(dto.getClassName(), dto.getLocator(), dto.getUrl());
         List<Healing> lastHealing = healingRepository.findLastBySelectorId(selectorId, PageRequest.of(0, 1));
         List<List<Node>> paths = selectorRepository.findById(selectorId)
                 .map(t -> t.getNodePathWrapper().getNodePath())
                 .orElse(Collections.emptyList());
-
         return new LastHealingDataDto()
                 .setPaths(paths)
                 .setPageContent(lastHealing.isEmpty() ? Strings.EMPTY : lastHealing.get(0).getPageContent());
@@ -115,10 +109,6 @@ public class HealingServiceImpl implements HealingService {
 
     @Override
     public Set<HealingDto> getHealings(RequestDto dto) {
-
-        dto.setUrl(Utils.trimQueryString(dto.getUrl()));
-        System.out.println("getHealings: " + dto.getUrl());
-
         Set<HealingDto> result = new HashSet<>();
         healingRepository.findAll(HealingSpecBuilder.buildSpec(dto)).stream()
                 .collect(Collectors.groupingBy(Healing::getSelector))
@@ -144,12 +134,7 @@ public class HealingServiceImpl implements HealingService {
 
     @Override
     public Set<HealingResultDto> getHealingResults(RequestDto dto) {
-
-        String url = Utils.trimQueryString(dto.getUrl());
-        String selectorId = Utils.buildKey(dto.getClassName(), dto.getLocator(), url);
-
-        System.out.println("getHealingResults-SelectorId: " + selectorId);
-
+        String selectorId = Utils.buildKey(dto.getClassName(), dto.getLocator(), dto.getUrl());
         return healingRepository.findBySelectorId(selectorId).stream()
                 .flatMap(it -> healingMapper.modelToResultDto(it.getResults()).stream())
                 .collect(Collectors.toSet());
@@ -175,13 +160,8 @@ public class HealingServiceImpl implements HealingService {
     }
 
     private Healing getHealing(HealingRequestDto dto) {
-
-        String url = Utils.trimQueryString(dto.getUrl());
-
         // build selector key
-        String selectorId = Utils.buildKey(dto.getClassName(), dto.getLocator(), url);
-        System.out.println("getHealing-SelectorId: " + selectorId);
-
+        String selectorId = Utils.buildKey(dto.getClassName(), dto.getLocator(), dto.getUrl());
         // build healing key
         String healingId = Utils.buildHealingKey(selectorId, dto.getPageContent());
         return healingRepository.findById(healingId).orElseGet(() -> {
