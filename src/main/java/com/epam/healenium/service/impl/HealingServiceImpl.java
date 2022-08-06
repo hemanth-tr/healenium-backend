@@ -104,7 +104,9 @@ public class HealingServiceImpl implements HealingService {
                 .orElseThrow(() -> new IllegalArgumentException("Internal exception! Somehow we lost selected healing result on save"));
         // add report record
         createReportRecord(selectedResult, healing, getSessionKey(headers), dto.getRequestDto().getScreenshot());
-        pushMetrics(dto.getMetrics(), headers, selectedResult);
+
+        // commented as we don't want to upload metrics to healenium.
+        // pushMetrics(dto.getMetrics(), headers, selectedResult);
     }
 
     @Override
@@ -147,7 +149,8 @@ public class HealingServiceImpl implements HealingService {
             HealingResult healingResult = healingResultOptional.get();
             healingResult.setSuccessHealing(dto.isSuccessHealing());
             resultRepository.save(healingResult);
-            try {
+            // commented as we don't want to share data to third party.
+            /* try {
                 if (!dto.isSuccessHealing()) {
                     amazonRestService.moveMetrics(SUCCESSFUL_HEALING_BUCKET, healingResult);
                 } else {
@@ -155,7 +158,7 @@ public class HealingServiceImpl implements HealingService {
                 }
             } catch (Exception ex) {
                 log.warn("Error during move metrics: {}", ex.getMessage());
-            }
+            } */
         }
     }
 
