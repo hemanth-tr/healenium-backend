@@ -2,7 +2,6 @@ package com.epam.healenium.model.dto;
 
 import com.epam.healenium.util.Utils;
 import lombok.Data;
-
 @Data
 public class RequestDto {
 
@@ -13,6 +12,8 @@ public class RequestDto {
     private byte[] screenshot;
 
     public String getUrl() {
-        return Utils.trimQueryString(url);
+        String urlWithoutQueryString = Utils.trimQueryString(url);
+        String finalUrl = Utils.ignoreWorkflowUUID(urlWithoutQueryString);
+        return finalUrl;
     }
 }
