@@ -53,22 +53,20 @@ public class Utils {
 
     public String trimQueryString(String url) {
         int queryStringStartIndex = url.indexOf("?");
+        if (queryStringStartIndex < 0) {
+            return url;
+        }
+
         return url.substring(0, queryStringStartIndex);
     }
 
     public String ignoreWorkflowUUID(String urlWithoutQueryString) {
 
-        URL url = null;
-        try {
-            url = new URL(urlWithoutQueryString);
-        } catch (MalformedURLException e) {
-            System.out.println(e.getMessage());
-            return urlWithoutQueryString;
-        }
 
-        String[] urlPath = url.getPath().split("/");
+        String[] urlPath = urlWithoutQueryString.split("/");
+
         String finalUrl = "/";
-        for (int i = 0; i < urlPath.length; i++) {
+        for (int i = 1; i < urlPath.length; i++) {
 
             if (urlPath[i] == null || urlPath[i].isEmpty() || isUUID(urlPath[i])) {
                 continue;
@@ -77,6 +75,7 @@ public class Utils {
             finalUrl += urlPath[i] + (i == urlPath.length - 1 ? "":"/");
         }
 
+        finalUrl = urlPath[0] + finalUrl;
         return finalUrl;
     }
 
@@ -85,7 +84,6 @@ public class Utils {
         try {
             UUID.fromString(id);
         } catch (Exception e) {
-            System.out.println(id + ", isUUID: " + e.getMessage());
             return false;
         }
 
